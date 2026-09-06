@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f7fb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Expense Tracker">
+  <title>Expense Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">PERSONAL FINANCE</p>
+        <h1>Expense Tracker</h1>
+      </div>
+      <button class="icon-btn" id="settingsBtn" aria-label="Open settings">⚙</button>
+    </header>
+
+    <main>
+      <section class="month-row">
+        <button class="month-btn" id="prevMonth" aria-label="Previous month">‹</button>
+        <button class="month-title" id="monthTitle"></button>
+        <button class="month-btn" id="nextMonth" aria-label="Next month">›</button>
+      </section>
+
+      <section class="hero-card">
+        <div>
+          <span>Total Expenses</span>
+          <strong id="totalAmount">₹0</strong>
+        </div>
+        <div class="hero-icon">₹</div>
+      </section>
+
+      <section class="summary-grid">
+        <button class="summary-card paid" data-filter="paid">
+          <span>Paid</span><strong id="paidAmount">₹0</strong><small id="paidCount">0 expenses</small>
+        </button>
+        <button class="summary-card unpaid" data-filter="unpaid">
+          <span>Unpaid</span><strong id="unpaidAmount">₹0</strong><small id="unpaidCount">0 expenses</small>
+        </button>
+      </section>
+
+      <section class="balance-card">
+        <div>
+          <span>Balance to Pay</span>
+          <strong id="balanceAmount">₹0</strong>
+        </div>
+        <span class="balance-badge" id="balanceBadge">All clear</span>
+      </section>
+
+      <section class="section-head">
+        <div>
+          <h2>Expenses</h2>
+          <p id="expenseSubtitle">0 expenses</p>
+        </div>
+        <button class="filter-btn" id="filterBtn">All ▾</button>
+      </section>
+
+      <div id="expenseList" class="expense-list"></div>
+
+      <section class="empty-state" id="emptyState" hidden>
+        <div class="empty-icon">✓</div>
+        <h3>No expenses here</h3>
+        <p>Add an expense to start tracking your spending.</p>
+      </section>
+    </main>
+
+    <button class="fab" id="addBtn" aria-label="Add expense">＋</button>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h2 id="modalTitle">Add Expense</h2>
+        <button class="icon-btn" id="closeModal">×</button>
+      </div>
+
+      <form id="expenseForm">
+        <input type="hidden" id="expenseId">
+        <label>Description
+          <input id="description" required maxlength="80" placeholder="e.g. Electricity bill">
+        </label>
+        <div class="form-row">
+          <label>Amount
+            <input id="amount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="0.00">
+          </label>
+          <label>Date
+            <input id="date" type="date" required>
+          </label>
+        </div>
+        <label>Category
+          <select id="category">
+            <option>Home</option><option>Food</option><option>Transport</option>
+            <option>Shopping</option><option>Bills</option><option>Health</option>
+            <option>Education</option><option>Entertainment</option><option>Other</option>
+          </select>
+        </label>
+        <label>Status
+          <select id="status">
+            <option value="unpaid">Unpaid</option>
+            <option value="paid">Paid</option>
+          </select>
+        </label>
+        <label>Notes <span class="optional">(optional)</span>
+          <textarea id="notes" rows="2" maxlength="180" placeholder="Add a note"></textarea>
+        </label>
+        <button class="primary-btn" type="submit" id="saveBtn">Save Expense</button>
+        <button class="danger-text" type="button" id="deleteBtn" hidden>Delete Expense</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="settingsModal" hidden>
+    <div class="modal">
+      <div class="modal-head"><h2>Settings</h2><button class="icon-btn" id="closeSettings">×</button></div>
+      <div class="settings-list">
+        <button class="setting-item" id="exportBtn"><span>Export backup</span><small>Save your expenses as JSON</small><b>›</b></button>
+        <label class="setting-item file-label"><span>Import backup</span><small>Restore a JSON backup</small><b>›</b><input id="importFile" type="file" accept=".json,application/json"></label>
+        <button class="setting-item" id="clearBtn"><span>Clear all data</span><small>This cannot be undone</small><b>›</b></button>
+      </div>
+      <p class="privacy-note">Your expenses are stored locally in this browser. Nothing is sent to a server.</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
