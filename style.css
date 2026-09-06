@@ -55,3 +55,8 @@ label{display:block;font-size:12px;font-weight:700;margin-bottom:13px}input,sele
   .hero-card{color:#111827}.hero-card span{opacity:.65}.icon-btn,.summary-card,.balance-card,.expense,.filter-btn,input,select,textarea{background:var(--card)}
   .category-icon{background:#252932}.primary-btn{background:#f5f6f8;color:#111827}.modal{background:var(--bg)}
 }
+
+/* Ensures display: grid elements respond to the [hidden] attribute */
+[hidden] {
+  display: none !important;
+}
