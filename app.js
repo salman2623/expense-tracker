@@ -37,6 +37,7 @@ function render(){
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 function fmtDate(s){return new Date(s+"T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short"})}
 
+// --- Expense Modal Controls ---
 function openModal(edit=null){
   $("modalBackdrop").hidden=false;
   $("modalTitle").textContent=edit?"Edit Expense":"Add Expense";
@@ -47,9 +48,27 @@ function openModal(edit=null){
 }
 function closeModal(){$("modalBackdrop").hidden=true}
 function openEdit(id){openModal(expenses.find(e=>e.id===id))}
+
 $("addBtn").onclick=()=>openModal();
 $("closeModal").onclick=closeModal;
 $("modalBackdrop").onclick=e=>{if(e.target===$("modalBackdrop"))closeModal()}
+
+// --- Settings Modal Controls ---
+function openSettings(){$("settingsModal").hidden=false}
+function closeSettings(){$("settingsModal").hidden=true}
+
+$("settingsBtn").onclick=openSettings;
+$("closeSettings").onclick=closeSettings;
+$("settingsModal").onclick=e=>{if(e.target===$("settingsModal"))closeSettings()}
+
+// --- Global Keydown (Escape key closes active screens) ---
+window.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    closeModal();
+    closeSettings();
+  }
+});
+
 $("expenseForm").onsubmit=e=>{
  e.preventDefault(); const id=$("expenseId").value;
  const item={id:id||crypto.randomUUID(),description:$("description").value.trim(),amount:Number($("amount").value),date:$("date").value,category:$("category").value,status:$("status").value,notes:$("notes").value.trim(),createdAt:id?(expenses.find(x=>x.id===id)?.createdAt||Date.now()):Date.now()};
@@ -63,28 +82,15 @@ $("nextMonth").onclick=()=>{viewDate.setMonth(viewDate.getMonth()+1);render()}
 $("filterBtn").onclick=()=>{currentFilter=currentFilter==="all"?"unpaid":currentFilter==="unpaid"?"paid":"all";render()}
 document.querySelectorAll(".summary-card").forEach(b=>b.onclick=()=>{currentFilter=b.dataset.filter;render()});
 
-// Settings Modal Controls
-$("settingsBtn").onclick=()=>$("settingsModal").hidden=false;
-$("closeSettings").onclick=()=>$("settingsModal").hidden=true;
-$("settingsModal").onclick=e=>{if(e.target===$("settingsModal"))$("settingsModal").hidden=true};
-
-// Keyboard listener for desktop
-window.addEventListener("keydown", e => {
-  if (e.key === "Escape") {
-    closeModal();
-    $("settingsModal").hidden = true;
-  }
-});
-
 $("exportBtn").onclick=()=>{
  const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),expenses},null,2)],{type:"application/json"});
  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`expense-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);toast("Backup exported");
 }
 $("importFile").onchange=e=>{
  const f=e.target.files[0];if(!f)return;const r=new FileReader();
- r.onload=()=>{try{const data=JSON.parse(r.result);if(!Array.isArray(data.expenses))throw 0;expenses=data.expenses;save();render();$("settingsModal").hidden=true;toast("Backup restored")}catch{alert("Invalid backup file.")}e.target.value=""};r.readAsText(f);
+ r.onload=()=>{try{const data=JSON.parse(r.result);if(!Array.isArray(data.expenses))throw 0;expenses=data.expenses;save();render();closeSettings();toast("Backup restored")}catch{alert("Invalid backup file.")}e.target.value=""};r.readAsText(f);
 }
-$("clearBtn").onclick=()=>{if(confirm("Delete ALL expenses? This cannot be undone.")){expenses=[];save();render();$("settingsModal").hidden=true;toast("All data cleared")}}
+$("clearBtn").onclick=()=>{if(confirm("Delete ALL expenses? This cannot be undone.")){expenses=[];save();render();closeSettings();toast("All data cleared")}}
 function toast(t){$("toast").textContent=t;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1800)}
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 render();
