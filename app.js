@@ -65,6 +65,14 @@ document.querySelectorAll(".summary-card").forEach(b=>b.onclick=()=>{currentFilt
 $("settingsBtn").onclick=()=>$("settingsModal").hidden=false;
 $("closeSettings").onclick=()=>$("settingsModal").hidden=true;
 $("settingsModal").onclick=e=>{if(e.target===$("settingsModal"))$("settingsModal").hidden=true}
+
+window.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){
+    closeModal();
+    $("settingsModal").hidden=true;
+  }
+});
+
 $("exportBtn").onclick=()=>{
  const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),expenses},null,2)],{type:"application/json"});
  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`expense-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);toast("Backup exported");
