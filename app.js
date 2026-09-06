@@ -46,6 +46,24 @@ function openModal(edit=null){
 }
 function closeModal(){$("modalBackdrop").hidden=true}
 function openEdit(id){openModal(expenses.find(e=>e.id===id))}
+
+// Opens settings and pushes a state to browser history
+function openSettings(){
+  $("settingsModal").hidden=false;
+  history.pushState({ modalOpen: true }, "");
+}
+
+// Closes both modals
+function closeAllModals(){
+  closeModal();
+  closeSettingsModal();
+}
+
+// Handles Android Back Button & iOS Swipe-Back gesture
+window.addEventListener("popstate", ()=>{
+  closeAllModals();
+});
+
 $("addBtn").onclick=()=>openModal();
 $("closeModal").onclick=closeModal;
 $("modalBackdrop").onclick=e=>{if(e.target===$("modalBackdrop"))closeModal()}
@@ -85,3 +103,28 @@ $("clearBtn").onclick=()=>{if(confirm("Delete ALL expenses? This cannot be undon
 function toast(t){$("toast").textContent=t;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1800)}
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 render();
+
+// Updates close button clicks to revert history state
+$("closeSettings").onclick=()=>{
+  closeSettingsModal();
+  if (history.state?.modalOpen) history.back();
+};
+$("closeModal").onclick=()=>{
+  closeModal();
+  if (history.state?.modalOpen) history.back();
+};
+
+// Handles tapping outside the modal on touchscreens
+$("modalBackdrop").onclick=e=>{
+  if(e.target===$("modalBackdrop")) {
+    closeModal();
+    if (history.state?.modalOpen) history.back();
+  }
+};
+$("settingsModal").onclick=e=>{
+  if(e.target===$("settingsModal")) {
+    closeSettingsModal();
+    if (history.state?.modalOpen) history.back();
+  }
+};
+  
