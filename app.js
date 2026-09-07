@@ -2,6 +2,8 @@ const KEY="expense_tracker_v1";
 let expenses=JSON.parse(localStorage.getItem(KEY)||"[]");
 let viewDate=new Date(); viewDate.setDate(1);
 let currentFilter="all";
+let searchTerm="";
+let categoryFilter="all";
 
 const $=id=>document.getElementById(id);
 const money=n=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(Number(n)||0);
@@ -22,17 +24,19 @@ function render(){
   $("balanceBadge").textContent=unpaid.length?"Needs attention":"All clear";
   $("balanceBadge").style.background=unpaid.length?"var(--orange-bg)":"var(--green-bg)";
   $("balanceBadge").style.color=unpaid.length?"var(--orange)":"var(--green)";
-  let filtered=list.filter(e=>currentFilter==="all"||e.status===currentFilter).sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt-a.createdAt);
+  let filtered=list.filter(e=>(currentFilter==="all"||e.status===currentFilter)&&(categoryFilter==="all"||e.category===categoryFilter)&&(!searchTerm||`${e.description} ${e.notes} ${e.category}`.toLowerCase().includes(searchTerm))).sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt-a.createdAt);
   $("expenseSubtitle").textContent=`${filtered.length} ${filtered.length===1?"expense":"expenses"}`;
   $("filterBtn").textContent=(currentFilter==="all"?"All":currentFilter[0].toUpperCase()+currentFilter.slice(1))+" ▾";
   $("expenseList").innerHTML=filtered.map(e=>`
     <article class="expense" data-id="${e.id}">
       <div class="category-icon">${icons[e.category]||"💳"}</div>
-      <div><div class="expense-name">${esc(e.description)}</div><div class="expense-meta">${esc(e.category)} · ${fmtDate(e.date)}</div></div>
+      <div><div class="expense-name">${esc(e.description)}</div><div class="expense-meta">${esc(e.category)} · ${fmtDate(e.date)}${e.status==="unpaid"&&e.date<new Date().toISOString().slice(0,10)?" · <b class=\"overdue\">OVERDUE</b>":""}</div></div>
       <div class="expense-right"><div class="expense-amount">${money(e.amount)}</div><div class="status ${e.status}">${e.status==="paid"?"PAID":"UNPAID"}</div></div>
     </article>`).join("");
   $("emptyState").hidden=filtered.length!==0;
   document.querySelectorAll(".expense").forEach(x=>x.onclick=()=>openEdit(x.dataset.id));
+  const byCat={}; list.forEach(e=>byCat[e.category]=(byCat[e.category]||0)+e.amount);
+  $("categorySummary").innerHTML=Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>`<span>${icons[c]||"💳"} ${esc(c)} <b>${money(v)}</b></span>`).join("");
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 function fmtDate(s){return new Date(s+"T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short"})}
@@ -80,12 +84,20 @@ $("deleteBtn").onclick=()=>{const id=$("expenseId").value;if(confirm("Delete thi
 $("prevMonth").onclick=()=>{viewDate.setMonth(viewDate.getMonth()-1);render()}
 $("nextMonth").onclick=()=>{viewDate.setMonth(viewDate.getMonth()+1);render()}
 $("filterBtn").onclick=()=>{currentFilter=currentFilter==="all"?"unpaid":currentFilter==="unpaid"?"paid":"all";render()}
+$("searchInput").oninput=e=>{searchTerm=e.target.value.trim().toLowerCase();render()}
+$("categoryFilter").onchange=e=>{categoryFilter=e.target.value;render()}
 document.querySelectorAll(".summary-card").forEach(b=>b.onclick=()=>{currentFilter=b.dataset.filter;render()});
 
 $("exportBtn").onclick=()=>{
  const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),expenses},null,2)],{type:"application/json"});
  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`expense-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);toast("Backup exported");
 }
+
+$("csvBtn").onclick=()=>{
+ const rows=[["Description","Amount","Date","Category","Status","Notes"],...expenses.map(e=>[e.description,e.amount,e.date,e.category,e.status,e.notes])];
+ const csv=rows.map(r=>r.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\n");
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=`expenses-${new Date().toISOString().slice(0,10)}.csv`;a.click();toast("CSV exported");
+};
 $("importFile").onchange=e=>{
  const f=e.target.files[0];if(!f)return;const r=new FileReader();
  r.onload=()=>{try{const data=JSON.parse(r.result);if(!Array.isArray(data.expenses))throw 0;expenses=data.expenses;save();render();closeSettings();toast("Backup restored")}catch{alert("Invalid backup file.")}e.target.value=""};r.readAsText(f);
