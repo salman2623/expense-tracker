@@ -1,19 +1,22 @@
-# Leave Tracker
+# Expense Tracker
 
-A simple, smooth, iPhone-friendly leave tracker.
+A mobile-first, single-user expense tracker built with plain HTML, CSS and JavaScript.
 
 ## Features
-- Current-year calendar
-- Saturdays and Sundays are automatic holidays
-- Log Offshore or Onshore leave
-- Leave note with quick options: Personal Leave, Offshore Holiday, Onshore Holiday, Other
-- Note field remains editable, so custom text can also be entered
-- Default required working days: 220
-- No annual leave allowance
-- Shows leave usage pace based on the 220-working-day target
+- Paid / unpaid tracking
+- Balance to pay
+- Monthly view
+- Categories
+- Add, edit and delete
 - Local browser storage
-- JSON backup and restore
-- PWA support for GitHub Pages / iPhone Home Screen
+- JSON export/import backup
+- PWA / iPhone Home Screen support
+- No server or database required
 
-## Use
-Open `index.html` in a browser, or deploy the folder to GitHub Pages.
+## GitHub Pages
+1. Create a GitHub repository, for example `expense-tracker`.
+2. Upload all files in this folder to the repository root.
+3. In **Settings → Pages**, choose the `main` branch and `/ (root)`.
+4. Save and open the published URL.
+
+GitHub Pages serves static HTML/CSS/JavaScript files directly from a repository.

@@ -1,1 +1,9 @@
-{"name":"Leave Tracker","short_name":"Leaves","start_url":"./","display":"standalone","background_color":"#f5f7fb","theme_color":"#f5f7fb","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
+{
+  "name":"Expense Tracker",
+  "short_name":"Expenses",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#f5f7fb",
+  "theme_color":"#f5f7fb",
+  "icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
